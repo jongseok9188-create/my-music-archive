@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7f7f5">
+<title>My Music Archive</title>
+<style>
+:root{--bg:#f7f7f5;--paper:#fff;--ink:#20201e;--muted:#888883;--line:#e9e9e5;--accent:#262623}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+button,input,textarea{font:inherit}
+.app{max-width:680px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top)) 20px calc(34px + env(safe-area-inset-bottom))}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:34px}
+.brand{font-size:12px;letter-spacing:.16em;font-weight:700}
+.header-note{font-size:11px;color:var(--muted)}
+h1{font-size:31px;letter-spacing:-.055em;line-height:1.2;margin:0 0 9px}
+.sub{font-size:13px;color:var(--muted);margin:0 0 26px}
+.stats{display:flex;gap:10px;margin-bottom:27px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 15px;flex:1}
+.stat b{display:block;font-size:22px;font-weight:650;letter-spacing:-.04em}
+.stat span{font-size:11px;color:var(--muted)}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 13px}
+.section-head h2{font-size:15px;margin:0;letter-spacing:-.02em}
+.add{border:0;background:var(--accent);color:white;border-radius:999px;padding:10px 15px;font-size:12px}
+.album-list{display:grid;gap:11px}
+.album{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;gap:13px;align-items:flex-start}
+.cover{width:76px;height:76px;border-radius:10px;background:#efefeb;display:flex;align-items:center;justify-content:center;flex:none;color:#aaa;font-size:10px;letter-spacing:.08em}
+.album-info{min-width:0;flex:1}
+.album-title{font-size:14px;font-weight:650;margin:3px 0 4px;overflow-wrap:anywhere}
+.artist{font-size:12px;color:var(--muted);margin-bottom:9px}
+.rating{font-size:12px;font-weight:650}
+.memo-preview{font-size:11px;color:#777;margin-top:7px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-actions{display:flex;gap:7px;margin-top:10px}
+.small-btn{background:#f5f5f2;border:0;border-radius:8px;padding:7px 10px;font-size:11px;color:#555}
+.empty{padding:35px 15px;text-align:center;border:1px dashed #dcdcd6;border-radius:16px;color:var(--muted);font-size:12px;line-height:1.8}
+footer{text-align:center;color:#aaa;font-size:10px;margin-top:30px}
+dialog{border:0;border-radius:20px;padding:0;width:calc(100% - 32px);max-width:460px;box-shadow:0 18px 70px #0002}
+dialog::backdrop{background:#0006}
+.modal{padding:22px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-head h2{font-size:18px;margin:0}
+.close{border:0;background:#f2f2ef;border-radius:50%;width:30px;height:30px}
+label{display:block;font-size:12px;font-weight:600;margin:15px 0 7px}
+input,textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:#fbfbfa;padding:12px;font-size:14px;outline:none}
+input:focus,textarea:focus{border-color:#999}
+textarea{min-height:105px;resize:vertical;line-height:1.55}
+.rating-row{display:flex;align-items:center;gap:12px}
+input[type=range]{padding:0;accent-color:#242421}
+#ratingValue{font-size:14px;font-weight:700;min-width:38px;text-align:right}
+.save{width:100%;margin-top:22px;padding:14px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-weight:600}
+.cancel{width:100%;padding:11px;border:0;background:transparent;color:var(--muted);font-size:12px}
+@media(min-width:600px){.app{padding-top:42px}.album-list{grid-template-columns:1fr 1fr}.album{min-height:130px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div class="brand">MY MUSIC ARCHIVE</div><div class="header-note">PERSONAL COLLECTION</div></header>
+<h1>나의 음악 기록</h1>
+<p class="sub">듣고, 기억하고, 기록하는 나만의 앨범 보관함.</p>
+<section class="stats">
+  <div class="stat"><b id="albumCount">0</b><span>기록한 앨범</span></div>
+  <div class="stat"><b id="averageRating">—</b><span>평균 평점</span></div>
+</section>
+<div class="section-head"><h2>앨범 보관함</h2><button class="add" id="addBtn">＋ 앨범 추가</button></div>
+<section class="album-list" id="albumList"></section>
+<footer>MY MUSIC ARCHIVE · YOUR LISTENING, YOUR STORY</footer>
+</main>
+
+<dialog id="editor">
+<form class="modal" id="albumForm">
+  <div class="modal-head"><h2 id="modalTitle">앨범 기록 추가</h2><button class="close" type="button" id="closeBtn">×</button></div>
+  <label for="albumName">앨범명</label><input id="albumName" required maxlength="100" placeholder="앨범 제목을 입력해 주세요">
+  <label for="artistName">아티스트</label><input id="artistName" required maxlength="100" placeholder="아티스트 이름">
+  <label for="rating">나의 평점</label>
+  <div class="rating-row"><input id="rating" type="range" min="0" max="10" step=".5" value="8"><span id="ratingValue">8.0 / 10</span></div>
+  <label for="memo">감상평</label><textarea id="memo" maxlength="2000" placeholder="이 앨범을 들으며 느낀 점을 자유롭게 적어보세요."></textarea>
+  <button class="save" type="submit">기록 저장</button>
+  <button class="cancel" type="button" id="cancelBtn">취소</button>
+</form>
+</dialog>
+<script>
+const KEY='my-music-archive-v1';
+let albums=JSON.parse(localStorage.getItem(KEY)||'[]');
+let editingId=null;
+const $=id=>document.getElementById(id);
+const escapeHTML=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function persist(){localStorage.setItem(KEY,JSON.stringify(albums));render();}
+function render(){
+  $('albumCount').textContent=albums.length;
+  $('averageRating').textContent=albums.length?(albums.reduce((s,a)=>s+Number(a.rating),0)/albums.length).toFixed(1):'—';
+  const list=$('albumList');
+  if(!albums.length){list.innerHTML='<div class="empty">아직 기록한 앨범이 없습니다.<br>첫 번째 앨범을 추가해 보세요.</div>';return;}
+  list.innerHTML=albums.slice().sort((a,b)=>b.createdAt-a.createdAt).map(a=>`
+    <article class="album">
+      <div class="cover">ALBUM</div>
+      <div class="album-info">
+        <div class="album-title">${escapeHTML(a.name)}</div>
+        <div class="artist">${escapeHTML(a.artist)}</div>
+        <div class="rating">★ ${Number(a.rating).toFixed(1)} / 10</div>
+        ${a.memo?`<div class="memo-preview">${escapeHTML(a.memo)}</div>`:''}
+        <div class="card-actions"><button class="small-btn" data-edit="${a.id}">수정</button><button class="small-btn" data-delete="${a.id}">삭제</button></div>
+      </div>
+    </article>`).join('');
+}
+function openEditor(album=null){
+  editingId=album?.id??null;
+  $('modalTitle').textContent=album?'앨범 기록 수정':'앨범 기록 추가';
+  $('albumName').value=album?.name??'';
+  $('artistName').value=album?.artist??'';
+  $('rating').value=album?.rating??8;
+  $('memo').value=album?.memo??'';
+  updateRating();$('editor').showModal();
+}
+function updateRating(){$('ratingValue').textContent=Number($('rating').value).toFixed(1)+' / 10';}
+function closeEditor(){$('editor').close();}
+$('addBtn').addEventListener('click',()=>openEditor());
+$('closeBtn').addEventListener('click',closeEditor);
+$('cancelBtn').addEventListener('click',closeEditor);
+$('rating').addEventListener('input',updateRating);
+$('albumForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const data={name:$('albumName').value.trim(),artist:$('artistName').value.trim(),rating:Number($('rating').value),memo:$('memo').value.trim()};
+  if(!data.name||!data.artist)return;
+  if(editingId){albums=albums.map(a=>a.id===editingId?{...a,...data}:a);}
+  else{albums.push({...data,id:crypto.randomUUID(),createdAt:Date.now()});}
+  persist();closeEditor();
+});
+$('albumList').addEventListener('click',e=>{
+  const edit=e.target.closest('[data-edit]');
+  const del=e.target.closest('[data-delete]');
+  if(edit){const a=albums.find(x=>x.id===edit.dataset.edit);if(a)openEditor(a);}
+  if(del){if(confirm('이 앨범 기록을 삭제할까요?')){albums=albums.filter(x=>x.id!==del.dataset.delete);persist();}}
+});
+render();
+</script>
+</body>
+</html>
