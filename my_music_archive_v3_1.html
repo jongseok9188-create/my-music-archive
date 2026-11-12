@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10121b">
+<title>My Music Archive</title>
+<style>
+:root{--bg:#0d0f17;--panel:#171a27;--panel2:#202437;--line:#2b3045;--text:#f3f4fa;--muted:#9ba2bb;--pink:#ec6a9d;--violet:#a78bfa;--green:#68d6ae}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% -10%,#28203d 0,transparent 34%),var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{padding:24px max(20px,calc((100% - 1160px)/2));border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font-weight:800;letter-spacing:.12em}.brand span{color:var(--pink)}.sub{color:var(--muted);font-size:12px;margin-top:4px}
+button,.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer;font:inherit}button.primary{background:linear-gradient(110deg,#d94f91,#8b6be8);border:0;font-weight:700}button:hover{filter:brightness(1.13)}
+main{max-width:1160px;margin:28px auto;padding:0 20px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat,.panel{background:linear-gradient(145deg,#1a1d2b,#141722);border:1px solid var(--line);border-radius:16px;padding:18px}.stat small,.muted{color:var(--muted)}.stat strong{display:block;font-size:27px;margin-top:5px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0 16px}.toolbar input,.toolbar select,.field input,.field textarea,.field select{background:#111522;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:11px;font:inherit;min-width:0}.toolbar input{flex:1;min-width:180px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:22px 0 12px}.section-head h2{font-size:18px;margin:0}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.album{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:.15s}.album:hover{transform:translateY(-2px);border-color:#62527e}.cover{aspect-ratio:1;background:#272b3b;display:grid;place-items:center;color:#818aa6;overflow:hidden}.cover img{width:100%;height:100%;object-fit:cover}.cover .placeholder{font-size:38px}.album-info{padding:11px}.album-title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.artist{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:12px;color:var(--muted)}.rating{color:#ffd18a}
+.empty{padding:40px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}
+dialog{background:#171a27;color:var(--text);border:1px solid var(--line);border-radius:18px;width:min(620px,calc(100% - 24px));padding:0;box-shadow:0 20px 80px #000a}dialog::backdrop{background:#05060acc;backdrop-filter:blur(5px)}.modal-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-body{padding:22px;display:grid;grid-template-columns:130px 1fr;gap:20px}.modal-cover{width:130px;aspect-ratio:1;border-radius:12px;object-fit:cover;background:#292d40}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;color:var(--muted)}.field input,.field textarea,.field select{width:100%}.field.full{grid-column:1/-1}.field textarea{min-height:90px;resize:vertical}.modal-actions{padding:16px 22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.danger{color:#ff9aa9}.search-results{grid-column:1/-1;display:grid;gap:8px}.search-result{display:flex;align-items:center;gap:10px;text-align:left;width:100%;padding:8px;background:#111522}.search-result img{width:48px;height:48px;object-fit:cover;border-radius:6px;flex:none}.search-result small{display:block;color:var(--muted);font-size:11px}.search-status{grid-column:1/-1;color:var(--muted);font-size:12px}.notice{margin-top:18px;padding:12px 14px;background:#201e31;border:1px solid #42385e;border-radius:12px;color:#c6c1df;font-size:12px}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr)}.modal-body{grid-template-columns:1fr}.modal-cover{width:110px}.fields{grid-template-columns:1fr}.field.full{grid-column:auto}header{padding:18px 20px}}
+</style>
+</head>
+<body>
+<header><div><div class="brand">MY MUSIC <span>ARCHIVE</span></div><div class="sub">나만의 음악 청취 기록 · 앨범 컬렉션</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="exportBtn">백업 내보내기</button><button id="importBtn">백업 가져오기</button><button class="primary" id="addBtn">＋ 앨범 추가</button><input id="importFile" type="file" accept="application/json" hidden></div></header>
+<main>
+<div class="stats">
+ <div class="stat"><small>등록 앨범</small><strong id="albumCount">0</strong></div>
+ <div class="stat"><small>총 감상 횟수</small><strong id="playCount">0</strong></div>
+ <div class="stat"><small>평가한 앨범</small><strong id="ratedCount">0</strong></div>
+ <div class="stat"><small>평균 평점</small><strong id="avgRating">—</strong></div>
+</div>
+<div class="toolbar"><input id="search" placeholder="앨범명 또는 아티스트 검색"><select id="sort"><option value="recent">최근 감상순</option><option value="rating">평점 높은순</option><option value="plays">감상 횟수순</option><option value="title">앨범명순</option></select><select id="filter"><option value="all">전체 앨범</option><option value="rated">평가한 앨범</option><option value="unrated">미평가 앨범</option></select></div>
+<div class="section-head"><h2>앨범 라이브러리</h2><span class="muted" id="shownCount"></span></div>
+<div class="grid" id="albums"></div>
+<div class="notice">현재 버전은 브라우저에 데이터를 저장하는 개인용 프로토타입입니다. 다른 기기와 자동 동기화하려면 다음 단계에서 Supabase 클라우드 연결이 필요합니다. 브라우저 데이터를 삭제하기 전에 백업을 내보내세요.</div>
+</main>
+<dialog id="albumDialog">
+ <div class="modal-head"><strong id="dialogTitle">앨범 추가</strong><button id="closeDialog">✕</button></div>
+ <form id="albumForm">
+  <div class="modal-body"><img id="preview" class="modal-cover" alt="앨범 커버 미리보기"><div class="fields">
+   <div class="field full"><label>앨범명 *</label><input name="title" required maxlength="180" placeholder="예: Blonde"></div>
+   <div class="field full"><label>아티스트 *</label><input name="artist" required maxlength="180" placeholder="예: Frank Ocean"></div>
+   <div class="field full"><button type="button" id="lookupBtn">앨범 정보 자동 검색</button><div id="lookupResults" class="search-results" aria-live="polite"></div></div>
+   <div class="field"><label>발매 연도</label><input name="releaseYear" type="number" min="1900" max="2100" step="1" placeholder="예: 2016"></div>
+   <div class="field"><label>발매일 (선택)</label><input name="releaseDate" type="date"></div>
+   <div class="field"><label>장르</label><input name="genre" placeholder="예: Alternative R&B"></div>
+   <div class="field"><label>내 평점 (5점 만점)</label><input name="rating" type="number" min="0" max="5" step="0.1" placeholder="비워두면 미평가"></div>
+   <div class="field"><label>수록곡 수</label><input name="tracks" type="number" min="0" step="1" placeholder="예: 17"></div>
+   <div class="field"><label>감상 횟수</label><input name="plays" type="number" min="0" step="1" value="1"></div>
+   <div class="field"><label>최근 감상일</label><input name="lastListened" type="date"></div>
+   <div class="field full"><label>앨범 커버 이미지 URL</label><input name="cover" type="url" placeholder="https://..."></div>
+   <div class="field full"><label>감상평</label><textarea name="review" placeholder="이 앨범에 대한 생각을 기록해 보세요."></textarea></div>
+  </div></div>
+  <div class="modal-actions"><button type="button" class="danger" id="deleteBtn" hidden>앨범 삭제</button><div style="margin-left:auto;display:flex;gap:8px"><button type="button" id="cancelBtn">취소</button><button class="primary" type="submit">저장</button></div></div>
+ </form>
+</dialog>
+<script>
+const KEY='my-music-archive-v1';
+let data=JSON.parse(localStorage.getItem(KEY)||'[]'), editing=null;
+const $=s=>document.querySelector(s);
+const today=()=>new Date().toISOString().slice(0,10);
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){
+ $('#albumCount').textContent=data.length.toLocaleString();
+ $('#playCount').textContent=data.reduce((n,a)=>n+(Number(a.plays)||0),0).toLocaleString();
+ const rated=data.filter(a=>a.rating!==''&&a.rating!=null&&Number.isFinite(Number(a.rating)));
+ $('#ratedCount').textContent=rated.length.toLocaleString();
+ $('#avgRating').textContent=rated.length?(rated.reduce((n,a)=>n+Number(a.rating),0)/rated.length).toFixed(1)+'/5':'—';
+ let q=$('#search').value.toLowerCase(), f=$('#filter').value, sort=$('#sort').value;
+ let list=data.filter(a=>(a.title+' '+a.artist+' '+(a.genre||'')).toLowerCase().includes(q));
+ if(f==='rated')list=list.filter(a=>a.rating!==''&&a.rating!=null);if(f==='unrated')list=list.filter(a=>a.rating===''||a.rating==null);
+ list.sort((a,b)=>sort==='rating'?(Number(b.rating)||0)-(Number(a.rating)||0):sort==='plays'?(Number(b.plays)||0)-(Number(a.plays)||0):sort==='title'?a.title.localeCompare(b.title):String(b.lastListened||b.createdAt||'').localeCompare(String(a.lastListened||a.createdAt||'')));
+ $('#shownCount').textContent=list.length+'개 표시';
+ $('#albums').innerHTML=list.length?list.map(a=>`<article class="album" data-id="${a.id}"><div class="cover">${a.cover?`<img src="${esc(a.cover)}" alt="" onerror="this.remove()">`:'<span class="placeholder">♫</span>'}</div><div class="album-info"><div class="album-title">${esc(a.title)}</div><div class="artist">${esc(a.artist)}</div><div class="artist">${esc(a.releaseYear||((a.releaseDate||'').slice(0,4))||'발매 연도 미등록')} · ${esc(a.genre||'장르 미등록')}</div><div class="meta"><span class="rating">${a.rating!==''&&a.rating!=null?'★ '+Number(a.rating).toFixed(1):'미평가'}</span><span>${Number(a.plays)||0}회 감상</span></div></div></article>`).join(''):'<div class="empty" style="grid-column:1/-1">아직 등록된 앨범이 없어.<br>‘앨범 추가’를 눌러 첫 앨범을 기록해 봐.</div>';
+}
+function openEditor(item=null){
+ editing=item?.id||null;$('#dialogTitle').textContent=item?'앨범 정보 수정':'앨범 추가';$('#deleteBtn').hidden=!item;
+ const form=$('#albumForm');form.reset();const vals=item||{plays:1,lastListened:today()};
+ for(const [k,v] of Object.entries(vals))if(form.elements[k])form.elements[k].value=v??'';
+ $('#preview').src=item?.cover||'';$('#preview').style.visibility=item?.cover?'visible':'hidden';$('#lookupResults').innerHTML='';
+ $('#albumDialog').showModal();
+}
+$('#addBtn').onclick=()=>openEditor();$('#closeDialog').onclick=$('#cancelBtn').onclick=()=>$('#albumDialog').close();
+// Search album metadata and artwork through Apple's public iTunes Search API.
+$('#lookupBtn').onclick=async()=>{
+ const title=$('#albumForm').elements.title.value.trim(), artist=$('#albumForm').elements.artist.value.trim(), box=$('#lookupResults');
+ if(!title||!artist){box.innerHTML='<div class="search-status">먼저 앨범명과 아티스트를 입력해 줘.</div>';return}
+ box.innerHTML='<div class="search-status">여러 검색 조건으로 앨범 정보를 찾고 있어…</div>';
+ try{
+  const queries=[
+   {term:title+' '+artist,country:'US'},
+   {term:title,country:'US'},
+   {term:title+' '+artist,country:'GB'},
+   {term:title+' '+artist,country:''},
+   {term:title,country:''}
+  ];
+  let matches=[];
+  for(const q of queries){
+   const params=new URLSearchParams({term:q.term,entity:'album',limit:'15'});
+   if(q.country)params.set('country',q.country);
+   const response=await fetch('https://itunes.apple.com/search?'+params.toString());
+   if(!response.ok)continue;
+   const result=await response.json();
+   const found=(result.results||[]).filter(x=>x.collectionName&&x.artistName);
+   if(found.length){matches=found;break;}
+  }
+  if(!matches.length){box.innerHTML='<div class="search-status">검색 결과가 없어. 앨범명만 입력해 다시 검색하거나 영문 표기를 확인해 줘.</div>';return}
+  box.innerHTML=matches.map((x,i)=>{const cover=(x.artworkUrl100||'').replace('100x100bb','600x600bb');return `<button type="button" class="search-result" data-result="${i}"><img src="${esc(cover)}" alt=""><span><strong>${esc(x.collectionName)}</strong><small>${esc(x.artistName)} · ${(x.releaseDate||'').slice(0,4)||'연도 정보 없음'} · ${esc(x.primaryGenreName||'장르 정보 없음')}</small></span></button>`}).join('');
+  box._matches=matches;
+ }catch(err){box.innerHTML='<div class="search-status">검색 서버에 연결하지 못했어. 인터넷 연결을 확인하고 다시 시도해 줘.</div>'}
+};
+$('#lookupResults').onclick=e=>{const btn=e.target.closest('[data-result]');if(!btn)return;const x=$('#lookupResults')._matches?.[Number(btn.dataset.result)];if(!x)return;const form=$('#albumForm');const cover=(x.artworkUrl100||'').replace('100x100bb','600x600bb');form.elements.title.value=x.collectionName||form.elements.title.value;form.elements.artist.value=x.artistName||form.elements.artist.value;if(x.releaseDate){form.elements.releaseDate.value=x.releaseDate.slice(0,10);form.elements.releaseYear.value=x.releaseDate.slice(0,4)}if(x.primaryGenreName)form.elements.genre.value=x.primaryGenreName;if(x.trackCount)form.elements.tracks.value=x.trackCount;if(cover){form.elements.cover.value=cover;$('#preview').src=cover;$('#preview').style.visibility='visible'}$('#lookupResults').innerHTML='<div class="search-status">앨범 정보를 입력했어. 확인한 뒤 저장해 줘.</div>'};
+$('#albumForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target),obj=Object.fromEntries(fd.entries());obj.rating=obj.rating===''?'':Number(obj.rating);obj.plays=Math.max(0,Number(obj.plays)||0);obj.tracks=Math.max(0,Number(obj.tracks)||0);obj.releaseYear=obj.releaseYear?String(Math.max(1900,Math.min(2100,Number(obj.releaseYear)||1900))):'';
+ if(editing){const i=data.findIndex(x=>x.id===editing);data[i]={...data[i],...obj,updatedAt:new Date().toISOString()}}
+ else data.unshift({...obj,id:crypto.randomUUID(),createdAt:new Date().toISOString()});
+ save();$('#albumDialog').close()};
+$('#deleteBtn').onclick=()=>{if(editing&&confirm('이 앨범 기록을 삭제할까?')){data=data.filter(a=>a.id!==editing);save();$('#albumDialog').close()}};
+$('#albums').onclick=e=>{const card=e.target.closest('[data-id]');if(card)openEditor(data.find(a=>a.id===card.dataset.id))};
+$('#preview').onerror=()=>{$('#preview').style.visibility='hidden'};$('#albumForm').elements.cover.oninput=e=>{const v=e.target.value;$('#preview').src=v;$('#preview').style.visibility=v?'visible':'hidden'};
+['search','sort','filter'].forEach(id=>$('#'+id).addEventListener(id==='search'?'input':'change',render));
+$('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),albums:data},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='my-music-archive-backup.json';a.click();URL.revokeObjectURL(a.href)};
+$('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text()),incoming=Array.isArray(obj)?obj:obj.albums;if(!Array.isArray(incoming))throw Error();if(confirm(`${incoming.length}개 앨범을 가져올까? 기존 기록과 합쳐져.`)){const ids=new Set(data.map(a=>a.id));for(const a of incoming){if(!a.id||ids.has(a.id))a.id=crypto.randomUUID();data.push(a);ids.add(a.id)}save()}}catch{alert('올바른 백업 파일이 아니야.')}e.target.value=''};
+render();
+</script>
+</body></html>
