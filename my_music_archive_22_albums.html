@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080808">
+<title>My Music Archive</title>
+<style>
+:root{--bg:#080808;--panel:#151515;--panel2:#202020;--line:#303030;--text:#f2f2f2;--muted:#a0a0a0;--black:#fff;--gray:#777}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:-.015em}
+header{padding:22px max(20px,calc((100% - 1160px)/2));border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:#101010}
+.brand{font-weight:850;letter-spacing:.16em;font-size:14px}.brand span{color:#777}.sub{color:var(--muted);font-size:12px;margin-top:5px}
+button,.btn{border:1px solid #3a3a3a;background:#1b1b1b;color:var(--text);padding:10px 14px;border-radius:7px;cursor:pointer;font:inherit;transition:background .15s,border-color .15s}
+button.primary{background:#f0f0f0;color:#111;border:1px solid #f0f0f0;font-weight:650}button:hover{background:#303030}button.primary:hover{background:#d2d2d2}
+main{max-width:1160px;margin:30px auto;padding:0 20px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat,.panel{background:#151515;border:1px solid var(--line);border-radius:10px;padding:17px 18px}.stat small,.muted{color:var(--muted)}.stat strong{display:block;font-size:27px;font-weight:650;margin-top:5px;letter-spacing:-.04em}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:25px 0 17px}.toolbar input,.toolbar select,.field input,.field textarea,.field select{background:#202020;color:var(--text);border:1px solid #3a3a3a;border-radius:7px;padding:11px;font:inherit;min-width:0}.toolbar input{flex:1;min-width:180px}.toolbar input:focus,.field input:focus,.field textarea:focus,.field select:focus{outline:2px solid #777;outline-offset:1px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:25px 0 13px}.section-head h2{font-size:17px;margin:0;font-weight:700;letter-spacing:-.03em}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:17px}
+.album{background:#151515;border:1px solid var(--line);border-radius:9px;overflow:hidden;cursor:pointer;transition:transform .16s,border-color .16s}.album:hover{transform:translateY(-3px);border-color:#777}.cover{aspect-ratio:1;background:#242424;display:grid;place-items:center;color:#777;overflow:hidden}.cover img{width:100%;height:100%;object-fit:cover}.cover .placeholder{font-size:38px}.album-info{padding:12px}.album-title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.artist{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12px;color:var(--muted)}.rating{color:#f2f2f2;font-weight:650}
+.empty{padding:42px;text-align:center;color:var(--muted);border:1px dashed #c8c8c4;border-radius:9px;background:#101010}
+dialog{background:#101010;color:var(--text);border:1px solid #cfcfca;border-radius:12px;width:min(620px,calc(100% - 24px));padding:0;box-shadow:0 20px 70px #0002}dialog::backdrop{background:#000b;backdrop-filter:blur(3px)}.modal-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:#171717}.modal-body{padding:22px;display:grid;grid-template-columns:130px 1fr;gap:20px}.modal-cover{width:130px;aspect-ratio:1;border-radius:7px;object-fit:cover;background:#242424}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;color:var(--muted)}.field input,.field textarea,.field select{width:100%}.field.full{grid-column:1/-1}.field textarea{min-height:90px;resize:vertical}.modal-actions{padding:16px 22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.danger{color:#8b2525}.search-results{grid-column:1/-1;display:grid;gap:8px}.search-result{display:flex;align-items:center;gap:10px;text-align:left;width:100%;padding:8px;background:#202020}.search-result img{width:48px;height:48px;object-fit:cover;border-radius:4px;flex:none}.search-result small{display:block;color:var(--muted);font-size:11px}.search-status{grid-column:1/-1;color:var(--muted);font-size:12px}.notice{margin-top:20px;padding:12px 14px;background:#191919;border:1px solid #333;border-radius:8px;color:#aaa;font-size:12px}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr);gap:9px}.stat{padding:14px}.stat strong{font-size:24px}.modal-body{grid-template-columns:1fr}.modal-cover{width:110px}.fields{grid-template-columns:1fr}.field.full{grid-column:auto}header{padding:17px 18px}main{margin:22px auto;padding:0 15px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.album-info{padding:9px}.album-title{font-size:13px}.artist{font-size:11px}.toolbar{gap:7px}.toolbar input{min-width:100%;}}
+
+.dashboard{margin:22px 0 28px;display:grid;gap:14px}
+.dash-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.dash-head h2{font-size:18px;margin:0}
+.dash-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.dash-card{background:#151515;border:1px solid var(--line);border-radius:10px;padding:15px}
+.dash-card small{color:var(--muted);display:block}
+.dash-card strong{display:block;font-size:22px;margin-top:5px}
+.dash-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dash-panel{background:#151515;border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.dash-panel h3{font-size:14px;margin:0 0 13px}
+.dash-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #292929;font-size:13px}
+.dash-row:last-child{border-bottom:0}
+.dash-row span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-row{display:grid;grid-template-columns:minmax(70px,1fr) 2fr 35px;gap:8px;align-items:center;margin:9px 0;font-size:12px}
+.bar-track{height:7px;background:#303030;border-radius:9px;overflow:hidden}
+.bar-fill{height:100%;background:#ddd;border-radius:9px}
+.dash-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dash-controls select{background:#202020;color:var(--text);border:1px solid #3a3a3a;border-radius:7px;padding:8px}
+.history-list{display:grid;gap:8px;margin-top:10px}
+.history-item{display:flex;gap:10px;align-items:center;background:#1b1b1b;padding:9px;border-radius:8px}
+.history-item img{width:42px;height:42px;object-fit:cover;border-radius:4px}
+.history-item .placeholder{width:42px;height:42px;display:grid;place-items:center;background:#292929;border-radius:4px}
+.history-item div:nth-child(2){min-width:0;flex:1}
+.history-item strong,.history-item small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history-item small{color:var(--muted);font-size:11px}
+.detail-body{padding:20px;display:grid;grid-template-columns:150px 1fr;gap:20px}
+.detail-cover{width:150px;aspect-ratio:1;object-fit:cover;background:#242424;border-radius:7px}
+.detail-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.detail-meta div{background:#1b1b1b;border-radius:7px;padding:10px}
+.detail-meta small{display:block;color:var(--muted);font-size:11px}
+.detail-meta strong{font-size:14px}
+.detail-review{white-space:pre-wrap;background:#1b1b1b;padding:12px;border-radius:7px;margin-top:12px;font-size:13px}
+@media(max-width:650px){.dash-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-columns{grid-template-columns:1fr}.detail-body{grid-template-columns:1fr}.detail-cover{width:120px}.detail-meta{grid-template-columns:1fr 1fr}}
+
+</style>
+</head>
+<body>
+<header><div><div class="brand">MY MUSIC <span>ARCHIVE</span></div><div class="sub">나만의 음악 청취 기록 · 앨범 컬렉션</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="exportBtn">백업 내보내기</button><button id="importBtn">백업 가져오기</button><button class="primary" id="addBtn">＋ 앨범 추가</button><input id="importFile" type="file" accept="application/json" hidden></div></header>
+<main>
+<div class="stats">
+ <div class="stat"><small>등록 앨범</small><strong id="albumCount">0</strong></div>
+ <div class="stat"><small>총 감상 횟수</small><strong id="playCount">0</strong></div>
+ <div class="stat"><small>평가한 앨범</small><strong id="ratedCount">0</strong></div>
+ <div class="stat"><small>평균 평점</small><strong id="avgRating">—</strong></div>
+</div>
+
+<section class="dashboard" aria-label="음악 통계">
+ <div class="dash-head"><h2>나의 음악 통계</h2><div class="dash-controls"><label class="muted" for="statsYear">기록 연도</label><select id="statsYear"></select></div></div>
+ <div class="dash-grid">
+  <div class="dash-card"><small>등록 앨범</small><strong id="dashAlbums">0</strong></div>
+  <div class="dash-card"><small>누적 감상 횟수</small><strong id="dashPlays">0</strong></div>
+  <div class="dash-card"><small>기록된 감상</small><strong id="dashLogged">0</strong></div>
+  <div class="dash-card"><small>평균 평점</small><strong id="dashRating">—</strong></div>
+ </div>
+ <div class="dash-columns">
+  <div class="dash-panel"><h3>많이 들은 앨범</h3><div id="topAlbums"></div></div>
+  <div class="dash-panel"><h3>최고 평점 앨범</h3><div id="topRated"></div></div>
+  <div class="dash-panel"><h3>장르별 컬렉션</h3><div id="genreStats"></div></div>
+  <div class="dash-panel"><h3>월별 감상 기록</h3><div id="monthlyStats"></div></div>
+ </div>
+ <div class="dash-panel"><h3 id="yearAlbumTitle">올해의 앨범</h3><div id="yearAlbum"></div><p class="muted" style="font-size:11px;margin:10px 0 0">감상 기록 기능으로 추가한 기록을 기준으로 집계해. 기존 누적 감상 횟수만으로는 과거의 월별 기록을 복원할 수 없어.</p></div>
+</section>
+
+<div class="toolbar"><input id="search" placeholder="앨범명 또는 아티스트 검색"><select id="sort"><option value="recent">최근 감상순</option><option value="rating">평점 높은순</option><option value="plays">감상 횟수순</option><option value="title">앨범명순</option><option value="artist">아티스트 이름순</option><option value="year">발매 연도순</option></select><select id="filter"><option value="all">전체 앨범</option><option value="rated">평가한 앨범</option><option value="unrated">미평가 앨범</option></select></div>
+<div class="section-head"><h2>앨범 라이브러리</h2><span class="muted" id="shownCount"></span></div>
+<div class="grid" id="albums"></div>
+<div class="notice">현재 버전은 브라우저에 데이터를 저장하는 개인용 프로토타입입니다. 다른 기기와 자동 동기화하려면 다음 단계에서 Supabase 클라우드 연결이 필요합니다. 브라우저 데이터를 삭제하기 전에 백업을 내보내세요.</div>
+</main>
+<dialog id="albumDialog">
+ <div class="modal-head"><strong id="dialogTitle">앨범 추가</strong><button id="closeDialog">✕</button></div>
+ <form id="albumForm">
+  <div class="modal-body"><img id="preview" class="modal-cover" alt="앨범 커버 미리보기"><div class="fields">
+   <div class="field full"><label>앨범명 *</label><input name="title" required maxlength="180" placeholder="예: Blonde"></div>
+   <div class="field full"><label>아티스트 *</label><input name="artist" required maxlength="180" placeholder="예: Frank Ocean"></div>
+   <div class="field full"><button type="button" id="lookupBtn">앨범 정보 자동 검색</button><div id="lookupResults" class="search-results" aria-live="polite"></div></div>
+   <div class="field"><label>앨범 유형</label><input name="type" placeholder="예: Album / EP / Mixtape"></div>
+   <div class="field"><label>발매 연도</label><input name="releaseYear" type="number" min="1900" max="2100" step="1" placeholder="예: 2016"></div>
+   <div class="field"><label>발매일 (선택)</label><input name="releaseDate" type="date"></div>
+   <div class="field"><label>장르</label><input name="genre" placeholder="예: Alternative R&B"></div>
+   <div class="field"><label>내 평점 (5점 만점)</label><input name="rating" type="number" min="0" max="5" step="0.1" placeholder="비워두면 미평가"></div>
+   <div class="field"><label>수록곡 수</label><input name="tracks" type="number" min="0" step="1" placeholder="예: 17"></div>
+   <div class="field"><label>감상 횟수</label><input name="plays" type="number" min="0" step="1" value="1"></div>
+   <div class="field"><label>최근 감상일</label><input name="lastListened" type="date"></div>
+   <div class="field full"><label>앨범 커버 이미지 URL</label><input name="cover" type="url" placeholder="https://..."></div>
+   <div class="field full"><label>감상평</label><textarea name="review" placeholder="이 앨범에 대한 생각을 기록해 보세요."></textarea></div>
+  </div></div>
+  <div class="modal-actions"><button type="button" class="danger" id="deleteBtn" hidden>앨범 삭제</button><div style="margin-left:auto;display:flex;gap:8px"><button type="button" id="cancelBtn">취소</button><button class="primary" type="submit">저장</button></div></div>
+ </form>
+</dialog>
+
+<dialog id="detailDialog">
+ <div class="modal-head"><strong>앨범 상세</strong><button id="closeDetail">✕</button></div>
+ <div class="detail-body">
+  <img id="detailCover" class="detail-cover" alt="앨범 커버">
+  <div>
+   <h2 id="detailTitle" style="font-size:19px;margin:0 0 4px"></h2>
+   <div id="detailArtist" class="muted" style="margin-bottom:14px"></div>
+   <div class="detail-meta">
+    <div><small>앨범 유형</small><strong id="detailType">—</strong></div>
+    <div><small>발매 연도</small><strong id="detailYear">—</strong></div>
+    <div><small>장르</small><strong id="detailGenre">—</strong></div>
+    <div><small>평점</small><strong id="detailRating">—</strong></div>
+    <div><small>누적 감상</small><strong id="detailPlays">0회</strong></div>
+    <div><small>수록곡</small><strong id="detailTracks">—</strong></div>
+    <div><small>최근 감상일</small><strong id="detailLast">—</strong></div>
+   </div>
+   <div class="detail-review" id="detailReview">감상평이 없어.</div>
+  </div>
+ </div>
+ <div class="modal-actions">
+  <button id="logListenBtn" class="primary">＋ 지금 감상 기록</button>
+  <div style="margin-left:auto;display:flex;gap:8px"><button id="editDetailBtn">수정</button><button class="danger" id="deleteDetailBtn">삭제</button></div>
+ </div>
+</dialog>
+
+<script>
+
+// 2026-11-17: requested album batch. Append once, preserving existing archive data.
+(function seedRequestedAlbums(){
+ const batch = [{"title": "channel ORANGE", "artist": "Frank Ocean", "type": "Album", "releaseYear": "2012", "releaseDate": "2012-07-10", "genre": "Alternative R&B, R&B, Hip-Hop, Soul", "tracks": 17, "cover": "https://media.gq.com/photos/5c3639b55293e1651323fd68/master/w_1024%2Cc_limit/2019-01-GQ-Frank-Timeline_Channel-ORange-3x4.jpg"}, {"title": "Blonde", "artist": "Frank Ocean", "type": "Album", "releaseYear": "2016", "releaseDate": "2016-08-20", "genre": "Alternative R&B, Pop", "tracks": 17, "cover": "https://unreleased.to/assets/art-blonde.jpg"}, {"title": "킁", "artist": "C JAMM", "type": "EP", "releaseYear": "2019", "releaseDate": "2019-05-16", "genre": "Korean Hip-Hop, Rap", "tracks": 12, "cover": "https://m.donutrecords.kr/web/product/extra/big/202404/eb8e26cd7afd3de4f33e5f56fbacf9de.jpg"}, {"title": "POP IS CRYIN'", "artist": "BewhY", "type": "Album", "releaseYear": "2026", "releaseDate": "2026-05-29", "genre": "Korean Hip-Hop, Rap", "tracks": 15, "cover": "https://izm-media.s3.amazonaws.com/BewhY_PIC.jpg"}, {"title": "NOWITZKI", "artist": "Beenzino", "type": "Album", "releaseYear": "2023", "releaseDate": "2023-07-03", "genre": "Alternative Rap, Korean Hip-Hop", "tracks": 18, "cover": "https://kream-phinf.pstatic.net/MjAyMzA3MjZfMjI5/MDAxNjkwMzM0MjYyNjc2.1zLqUFdVweZpLkSJmwsofmOIgx-Dfk4HAByQX5hmbFog.NKpgrOYHHmyafDOEFKMLZui1luI1TupdTAMN1FFgUBgg.JPEG/a_5cf5476ae29042b28ae8c6b181d0a08c.jpg?type=l"}, {"title": "오보에", "artist": "양홍원", "type": "Album", "releaseYear": "", "releaseDate": "", "genre": "Korean Hip-Hop, Rap", "tracks": "", "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1d/91/d0/1d91d04e-e509-2d85-72f7-dcffe5359d13/cover-_0601.jpg/1200x630bb.jpg"}, {"title": "SLOWMO", "artist": "양홍원", "type": "Album", "releaseYear": "2024", "releaseDate": "2024-05-24", "genre": "Korean Hip-Hop, Rap", "tracks": 8, "cover": "https://baro7.com/cdn/shop/files/yang-hong-won-mixtape-slowmo-312174.jpg?v=1721849591"}, {"title": "Stranger", "artist": "양홍원", "type": "Album", "releaseYear": "2019", "releaseDate": "2019-02-16", "genre": "Korean Hip-Hop, Rap", "tracks": "", "cover": "https://www.musicplaza.com/cdn/shop/products/YOUNG_9ef9f570-c8e9-4033-8df3-b55508e8729a.jpg?v=1559773555"}, {"title": "SOkoNYUN", "artist": "양홍원", "type": "Album", "releaseYear": "", "releaseDate": "", "genre": "Korean Hip-Hop, Rap", "tracks": "", "cover": ""}, {"title": "TRIPONOEL", "artist": "NO:EL", "type": "Album", "releaseYear": "2023", "releaseDate": "2023-07-26", "genre": "Korean Hip-Hop, Rap", "tracks": 12, "cover": "https://i.ebayimg.com/images/g/nzIAAOSwgOllaNdc/s-l400.jpg"}, {"title": "21'S/S", "artist": "NO:EL", "type": "Album", "releaseYear": "2021", "releaseDate": "2021-04-29", "genre": "Korean Hip-Hop, Rap", "tracks": 9, "cover": "https://i1.sndcdn.com/artworks-klzancujKYZOXuZY-8Q4hiw-t1080x1080.jpg"}, {"title": "ELLEONOEL", "artist": "NO:EL", "type": "Album", "releaseYear": "2017", "releaseDate": "2017-09-02", "genre": "Korean Hip-Hop, Rap", "tracks": 13, "cover": ""}, {"title": "18'S/S", "artist": "NO:EL", "type": "EP", "releaseYear": "2018", "releaseDate": "2018-04-10", "genre": "Korean Hip-Hop, Rap", "tracks": "", "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b9/ab/80/b9ab80a8-81ed-d559-9d71-06aa0435b8df/8804775091537.jpg/1200x630bb.jpg"}, {"title": "LOVE$ICK", "artist": "Kid Milli", "type": "Album", "releaseYear": "2026", "releaseDate": "2026-04-01", "genre": "Korean Hip-Hop, Rap", "tracks": 9, "cover": "https://kpopping.com/_next/image?q=75&url=https%3A%2F%2Fcdn.kpopping.com%2Falbums%2Flovesick%2Fcover.jpg%3Fv%3D1774603681933&w=3840"}, {"title": "BEIGE", "artist": "Kid Milli", "type": "Album", "releaseYear": "2023", "releaseDate": "2023-05-30", "genre": "Korean Hip-Hop, Rap", "tracks": 17, "cover": "https://pbs.twimg.com/media/FxYMJPeXwAIw6kH.jpg"}, {"title": "MAINSTREAM", "artist": "Kid Milli, OKASHII", "type": "Album", "releaseYear": "2026", "releaseDate": "2026-05-08", "genre": "Korean Hip-Hop, Rap", "tracks": 10, "cover": ""}, {"title": "Cliché", "artist": "Kid Milli, dress", "type": "Album", "releaseYear": "2021", "releaseDate": "", "genre": "Korean Hip-Hop, Rap", "tracks": 14, "cover": "https://www.minishop.com.hk/2.0/7780-large_default/cliche-kid-milli-dress-cliche.jpg"}, {"title": "AI, THE PLAYLIST", "artist": "Kid Milli", "type": "Album", "releaseYear": "2018", "releaseDate": "2018-03-10", "genre": "Korean Hip-Hop, Rap", "tracks": 13, "cover": "https://image.aladin.co.kr/product/13815/83/cover500/c282837809_1.jpg"}, {"title": "걘", "artist": "C JAMM", "type": "EP", "releaseYear": "2022", "releaseDate": "2022-03-03", "genre": "Korean Hip-Hop, Rap", "tracks": "", "cover": ""}, {"title": "The Movie Star", "artist": "BewhY", "type": "Album", "releaseYear": "2019", "releaseDate": "2019-07-25", "genre": "Korean Hip-Hop, Rap", "tracks": 12, "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/ef/50/5d/ef505d7f-4028-c76c-76ea-284bd761abce/cover-BewhY.jpg/3880x3880bb.webp"}, {"title": "The Blind Star", "artist": "BewhY", "type": "Album", "releaseYear": "2017", "releaseDate": "", "genre": "Korean Hip-Hop, Rap", "tracks": "", "cover": "https://static.wixstatic.com/media/fe9cbe_4c2f68977a1f4a578f917fbd59868e86~mv2.jpg/v1/fill/w_760%2Ch_760%2Cal_c%2Cq_85/fe9cbe_4c2f68977a1f4a578f917fbd59868e86~mv2.jpg"}, {"title": "2 MANY HOMES 4 1 KID", "artist": "JUSTHIS", "type": "Album", "releaseYear": "2016", "releaseDate": "2016-06-14", "genre": "Korean Hip-Hop, Rap", "tracks": 14, "cover": "https://image.genie.co.kr/Y/IMAGE/IMG_ALBUM/080/829/480/80829480_1465869095373_1_600x600.JPG"}];
+ const key = 'my-music-archive-v1';
+ let current = [];
+ try { current = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { current = []; }
+ const norm = s => String(s || '').trim().toLowerCase().replace(/\s+/g,' ');
+ let added = 0;
+ for (const a of batch) {
+   const exists = current.some(x => norm(x.title) === norm(a.title) && norm(x.artist) === norm(a.artist));
+   if (exists) continue;
+   const createdAt = new Date().toISOString();
+   current.unshift({
+     ...a, rating:'', plays:0, lastListened:'', review:'',
+     id: (crypto.randomUUID ? crypto.randomUUID() : 'seed-'+Date.now()+'-'+Math.random()),
+     createdAt, listeningHistory:[]
+   });
+   added++;
+ }
+ if (added) localStorage.setItem(key, JSON.stringify(current));
+})();
+
+const KEY='my-music-archive-v1';
+let data=JSON.parse(localStorage.getItem(KEY)||'[]'), editing=null;
+const $=s=>document.querySelector(s);
+const today=()=>new Date().toISOString().slice(0,10);
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){
+ $('#albumCount').textContent=data.length.toLocaleString();
+ $('#playCount').textContent=data.reduce((n,a)=>n+(Number(a.plays)||0),0).toLocaleString();
+ const rated=data.filter(a=>a.rating!==''&&a.rating!=null&&Number.isFinite(Number(a.rating)));
+ $('#ratedCount').textContent=rated.length.toLocaleString();
+ $('#avgRating').textContent=rated.length?(rated.reduce((n,a)=>n+Number(a.rating),0)/rated.length).toFixed(1)+'/5':'—';
+ renderDashboard();
+ let q=$('#search').value.toLowerCase(), f=$('#filter').value, sort=$('#sort').value;
+ let list=data.filter(a=>(a.title+' '+a.artist+' '+(a.genre||'')).toLowerCase().includes(q));
+ if(f==='rated')list=list.filter(a=>a.rating!==''&&a.rating!=null);if(f==='unrated')list=list.filter(a=>a.rating===''||a.rating==null);
+ list.sort((a,b)=>sort==='rating'?((Number(b.rating)||0)-(Number(a.rating)||0))||a.title.localeCompare(b.title):sort==='plays'?(Number(b.plays)||0)-(Number(a.plays)||0):sort==='title'?a.title.localeCompare(b.title):sort==='artist'?a.artist.localeCompare(b.artist,'ko')||a.title.localeCompare(b.title):sort==='year'?String(b.releaseYear||'').localeCompare(String(a.releaseYear||'')):String(b.lastListened||b.createdAt||'').localeCompare(String(a.lastListened||a.createdAt||'')));
+ $('#shownCount').textContent=list.length+'개 표시';
+ $('#albums').innerHTML=list.length?list.map(a=>`<article class="album" data-id="${esc(a.id)}"><div class="cover">${a.cover?`<img src="${esc(a.cover)}" alt="" onerror="this.remove()">`:'<span class="placeholder">♫</span>'}</div><div class="album-info"><div class="album-title">${esc(a.title)}</div><div class="artist">${esc(a.artist)}</div><div class="artist">${esc(a.releaseYear||((a.releaseDate||'').slice(0,4))||'발매 연도 미등록')} · ${esc(a.genre||'장르 미등록')}</div><div class="meta"><span class="rating">${a.rating!==''&&a.rating!=null?'★ '+Number(a.rating).toFixed(1):'미평가'}</span><span>${Number(a.plays)||0}회 감상</span></div></div></article>`).join(''):'<div class="empty" style="grid-column:1/-1">아직 등록된 앨범이 없어.<br>‘앨범 추가’를 눌러 첫 앨범을 기록해 봐.</div>';
+}
+function getHistory(a){return Array.isArray(a.listeningHistory)?a.listeningHistory:[]}
+function renderDashboard(){
+ const years=[...new Set(data.flatMap(a=>getHistory(a).map(h=>(h.date||'').slice(0,4))).filter(y=>/^\d{4}$/.test(y)))].sort().reverse();
+ const current=String(new Date().getFullYear());
+ if(!years.includes(current))years.unshift(current);
+ const sel=$('#statsYear');const old=sel.value;sel.innerHTML=years.map(y=>`<option value="${y}">${y}년</option>`).join('');sel.value=years.includes(old)?old:current;
+ const year=sel.value;
+ const allLogs=data.flatMap(a=>getHistory(a).map(h=>({...h,title:a.title,artist:a.artist,cover:a.cover,albumId:a.id}))).filter(h=>h.date);
+ const logs=allLogs.filter(h=>h.date.slice(0,4)===year);
+ const totalPlays=data.reduce((n,a)=>n+(Number(a.plays)||0),0);
+ const rated=data.filter(a=>a.rating!==''&&a.rating!=null&&Number.isFinite(Number(a.rating)));
+ $('#dashAlbums').textContent=data.length.toLocaleString();
+ $('#dashPlays').textContent=totalPlays.toLocaleString();
+ $('#dashLogged').textContent=allLogs.length.toLocaleString();
+ $('#dashRating').textContent=rated.length?(rated.reduce((n,a)=>n+Number(a.rating),0)/rated.length).toFixed(1)+'/5':'—';
+ const top=[...data].sort((a,b)=>(Number(b.plays)||0)-(Number(a.plays)||0)).slice(0,5);
+ $('#topAlbums').innerHTML=top.length?top.map((a,i)=>`<div class="dash-row"><span>${i+1}. ${esc(a.title)} <span class="muted">· ${esc(a.artist)}</span></span><strong>${Number(a.plays)||0}회</strong></div>`).join(''):'<div class="muted">아직 기록이 없어.</div>';
+ const best=[...rated].sort((a,b)=>Number(b.rating)-Number(a.rating)).slice(0,5);
+ $('#topRated').innerHTML=best.length?best.map((a,i)=>`<div class="dash-row"><span>${i+1}. ${esc(a.title)} <span class="muted">· ${esc(a.artist)}</span></span><strong>★ ${Number(a.rating).toFixed(1)}</strong></div>`).join(''):'<div class="muted">평가한 앨범이 없어.</div>';
+ const genres={};data.forEach(a=>{const g=(a.genre||'장르 미등록').trim()||'장르 미등록';genres[g]=(genres[g]||0)+1});
+ const genreRows=Object.entries(genres).sort((a,b)=>b[1]-a[1]).slice(0,8), maxGenre=Math.max(1,...genreRows.map(x=>x[1]));
+ $('#genreStats').innerHTML=genreRows.length?genreRows.map(([g,n])=>`<div class="bar-row"><span>${esc(g)}</span><div class="bar-track"><div class="bar-fill" style="width:${n/maxGenre*100}%"></div></div><strong>${n}</strong></div>`).join(''):'<div class="muted">장르 정보가 없어.</div>';
+ const months=Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0')).map(m=>[m,logs.filter(h=>h.date.slice(5,7)===m).length]);
+ const maxMonth=Math.max(1,...months.map(x=>x[1]));
+ $('#monthlyStats').innerHTML=months.map(([m,n])=>`<div class="bar-row"><span>${Number(m)}월</span><div class="bar-track"><div class="bar-fill" style="width:${n/maxMonth*100}%"></div></div><strong>${n}</strong></div>`).join('');
+ $('#yearAlbumTitle').textContent=year+'년의 앨범';
+ const counts={};logs.forEach(h=>{const k=h.albumId;counts[k]=(counts[k]||0)+1});
+ const winner=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+ const album=winner&&data.find(a=>a.id===winner[0]);
+ $('#yearAlbum').innerHTML=album?`<div class="history-item">${album.cover?`<img src="${esc(album.cover)}" alt="">`:'<div class="placeholder">♫</div>'}<div><strong>${esc(album.title)}</strong><small>${esc(album.artist)} · ${winner[1]}회 기록</small></div></div>`:'<div class="muted">이 연도에 기록된 감상이 아직 없어. 앨범 상세에서 ‘지금 감상 기록’을 눌러 추가할 수 있어.</div>';
+}
+
+function openEditor(item=null){
+ editing=item?.id||null;$('#dialogTitle').textContent=item?'앨범 정보 수정':'앨범 추가';$('#deleteBtn').hidden=!item;
+ const form=$('#albumForm');form.reset();const vals=item||{plays:1,lastListened:today()};
+ for(const [k,v] of Object.entries(vals))if(form.elements[k])form.elements[k].value=v??'';
+ $('#preview').src=item?.cover||'';$('#preview').style.visibility=item?.cover?'visible':'hidden';$('#lookupResults').innerHTML='';
+ $('#albumDialog').showModal();
+}
+
+let detailId=null;
+function openDetail(item){
+ if(!item)return;detailId=item.id;
+ $('#detailCover').src=item.cover||'';$('#detailCover').style.visibility=item.cover?'visible':'hidden';
+ $('#detailTitle').textContent=item.title||'제목 없음';$('#detailArtist').textContent=item.artist||'';
+ $('#detailType').textContent=item.type||'—';
+ $('#detailYear').textContent=item.releaseYear||((item.releaseDate||'').slice(0,4))||'—';
+ $('#detailGenre').textContent=item.genre||'—';$('#detailRating').textContent=item.rating!==''&&item.rating!=null?'★ '+Number(item.rating).toFixed(1)+'/5':'미평가';
+ $('#detailPlays').textContent=(Number(item.plays)||0)+'회';$('#detailTracks').textContent=item.tracks||'—';
+ $('#detailLast').textContent=item.lastListened||'—';$('#detailReview').textContent=item.review||'감상평이 없어.';
+ $('#detailDialog').showModal();
+}
+$('#closeDetail').onclick=()=>$('#detailDialog').close();
+$('#editDetailBtn').onclick=()=>{const item=data.find(a=>a.id===detailId);$('#detailDialog').close();if(item)openEditor(item)};
+$('#deleteDetailBtn').onclick=()=>{if(detailId&&confirm('이 앨범 기록을 삭제할까?')){data=data.filter(a=>a.id!==detailId);$('#detailDialog').close();save()}};
+$('#logListenBtn').onclick=()=>{const item=data.find(a=>a.id===detailId);if(!item)return;const date=today();item.plays=(Number(item.plays)||0)+1;item.lastListened=date;item.listeningHistory=getHistory(item);item.listeningHistory.push({date,at:new Date().toISOString()});save();openDetail(item)};
+
+$('#addBtn').onclick=()=>openEditor();$('#closeDialog').onclick=$('#cancelBtn').onclick=()=>$('#albumDialog').close();
+// Search album metadata and artwork through Apple's public iTunes Search API.
+function normalizeMusicText(value='') {
+ return String(value).normalize('NFKC').toLocaleLowerCase('en')
+  .replace(/[’'`]/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim().replace(/\s+/g, ' ');
+}
+function artistAliases(value='') {
+ const n = normalizeMusicText(value);
+ const aliases = {
+  '씨잼': ['c jamm', 'c-jamm', 'cjam m', '씨잼'],
+  'c jamm': ['c jamm', 'c-jamm', '씨잼'],
+  '더콰이엇': ['the quiett', 'the quiett'],
+  '빈지노': ['beenzino'],
+  '이센스': ['e sens', 'e-sens'],
+  '비와이': ['bewhy', '비와이'],
+  '창모': ['changmo', '창모']
+ };
+ return [...new Set([n, ...(aliases[n] || [])].filter(Boolean))];
+}
+function searchAppleAlbums(term, country) {
+ return new Promise((resolve, reject) => {
+  const callback = 'itunes_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  const params = new URLSearchParams({term, country, media:'music', entity:'album', limit:'50', callback});
+  const script = document.createElement('script');
+  let finished = false;
+  const cleanup = () => {
+   if (finished) return;
+   finished = true; clearTimeout(timer);
+   try { delete window[callback]; } catch (_) { window[callback] = undefined; }
+   script.remove();
+  };
+  const timer = setTimeout(() => { cleanup(); reject(new Error('검색 시간 초과')); }, 10000);
+  window[callback] = payload => { cleanup(); resolve(payload && Array.isArray(payload.results) ? payload.results : []); };
+  script.onerror = () => { cleanup(); reject(new Error('검색 서버 연결 실패')); };
+  script.src = 'https://itunes.apple.com/search?' + params.toString();
+  document.head.appendChild(script);
+ });
+}
+$('#lookupBtn').onclick = async () => {
+ const form = $('#albumForm');
+ const title = form.elements.title.value.trim();
+ const artist = form.elements.artist.value.trim();
+ const box = $('#lookupResults');
+ if (!title || !artist) {
+  box.innerHTML = '<div class="search-status">앨범명과 아티스트를 모두 입력해 줘.</div>';
+  return;
+ }
+ box.innerHTML = '<div class="search-status">입력한 앨범명과 아티스트가 일치하는 결과만 찾고 있어…</div>';
+ const wantedTitle = normalizeMusicText(title);
+ const wantedArtists = artistAliases(artist);
+ const artistSearch = wantedArtists.filter(x => x.length >= 2);
+ const queries = [...new Set([
+  `${title} ${artistSearch[1] || artistSearch[0]}`,
+  ...artistSearch,
+  title
+ ].filter(Boolean))];
+ const countries = ['US', 'GB', 'KR', 'CA', 'AU'];
+ const found = new Map();
+ try {
+  for (const term of queries) {
+   for (const country of countries) {
+    let results = [];
+    try { results = await searchAppleAlbums(term, country); } catch (_) { continue; }
+    for (const item of results) {
+     if (!item.collectionName || !item.artistName) continue;
+     const gotArtist = normalizeMusicText(item.artistName);
+     const gotTitle = normalizeMusicText(item.collectionName);
+     const artistMatch = wantedArtists.some(a => a && (gotArtist === a || gotArtist.includes(a) || a.includes(gotArtist)));
+     const titleMatch = gotTitle === wantedTitle || gotTitle.includes(wantedTitle) || wantedTitle.includes(gotTitle);
+     // Avoid unrelated results: both artist and album title must match.
+     if (!artistMatch || !titleMatch) continue;
+     const key = String(item.collectionId || `${gotTitle}|${gotArtist}`);
+     const score = (gotArtist === wantedArtists[0] ? 4 : 0) + (gotTitle === wantedTitle ? 5 : 0) + (item.collectionType === 'Album' ? 1 : 0);
+     const old = found.get(key);
+     if (!old || score > old.score) found.set(key, {item, score});
+    }
+   }
+  }
+  const matches = [...found.values()].sort((a,b) => b.score-a.score).map(x=>x.item).slice(0,15);
+  if (!matches.length) {
+   box.innerHTML = '<div class="search-status">정확히 일치하는 앨범을 찾지 못했어. 한글·영문 표기를 바꿔 검색해 봐. 엉뚱한 결과는 표시하지 않도록 했어.</div>';
+   return;
+  }
+  box._matches = matches;
+  box.innerHTML = matches.map((item, i) => {
+   const cover = (item.artworkUrl100 || '').replace('100x100bb', '600x600bb');
+   return `<button type="button" class="search-result" data-result="${i}"><img src="${esc(cover)}" alt=""><span><strong>${esc(item.collectionName)}</strong><small>${esc(item.artistName)} · ${(item.releaseDate || '').slice(0,4) || '연도 정보 없음'} · ${esc(item.primaryGenreName || '장르 정보 없음')}</small></span></button>`;
+  }).join('');
+ } catch (_) {
+  box.innerHTML = '<div class="search-status">검색 서버에 연결하지 못했어. 인터넷 연결을 확인해 줘.</div>';
+ }
+};
+$('#lookupResults').onclick=e=>{const btn=e.target.closest('[data-result]');if(!btn)return;const x=$('#lookupResults')._matches?.[Number(btn.dataset.result)];if(!x)return;const form=$('#albumForm');const cover=(x.artworkUrl100||'').replace('100x100bb','600x600bb');form.elements.title.value=x.collectionName||form.elements.title.value;form.elements.artist.value=x.artistName||form.elements.artist.value;if(x.releaseDate){form.elements.releaseDate.value=x.releaseDate.slice(0,10);form.elements.releaseYear.value=x.releaseDate.slice(0,4)}if(x.primaryGenreName)form.elements.genre.value=x.primaryGenreName;if(x.trackCount)form.elements.tracks.value=x.trackCount;if(cover){form.elements.cover.value=cover;$('#preview').src=cover;$('#preview').style.visibility='visible'}$('#lookupResults').innerHTML='<div class="search-status">앨범 정보를 입력했어. 확인한 뒤 저장해 줘.</div>'};
+$('#albumForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target),obj=Object.fromEntries(fd.entries());obj.rating=obj.rating===''?'':Number(obj.rating);obj.plays=Math.max(0,Number(obj.plays)||0);obj.tracks=Math.max(0,Number(obj.tracks)||0);obj.releaseYear=obj.releaseYear?String(Math.max(1900,Math.min(2100,Number(obj.releaseYear)||1900))):'';
+ if(editing){const i=data.findIndex(x=>x.id===editing);data[i]={...data[i],...obj,updatedAt:new Date().toISOString()}}
+ else {const createdAt=new Date().toISOString();const fresh={...obj,id:crypto.randomUUID(),createdAt,listeningHistory:[]};if((Number(obj.plays)||0)>0&&obj.lastListened)fresh.listeningHistory.push({date:obj.lastListened,at:createdAt});data.unshift(fresh);}
+ save();$('#albumDialog').close()};
+$('#deleteBtn').onclick=()=>{if(editing&&confirm('이 앨범 기록을 삭제할까?')){data=data.filter(a=>a.id!==editing);save();$('#albumDialog').close()}};
+$('#albums').onclick=e=>{const card=e.target.closest('[data-id]');if(card)openDetail(data.find(a=>a.id===card.dataset.id))};
+$('#statsYear').addEventListener('change',renderDashboard);
+$('#preview').onerror=()=>{$('#preview').style.visibility='hidden'};$('#albumForm').elements.cover.oninput=e=>{const v=e.target.value;$('#preview').src=v;$('#preview').style.visibility=v?'visible':'hidden'};
+['search','sort','filter'].forEach(id=>$('#'+id).addEventListener(id==='search'?'input':'change',render));
+$('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),albums:data},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='my-music-archive-backup.json';a.click();URL.revokeObjectURL(a.href)};
+$('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text()),incoming=Array.isArray(obj)?obj:obj.albums;if(!Array.isArray(incoming))throw Error();if(confirm(`${incoming.length}개 앨범을 가져올까? 기존 기록과 합쳐져.`)){const ids=new Set(data.map(a=>a.id));for(const a of incoming){if(!a.id||ids.has(a.id))a.id=crypto.randomUUID();data.push(a);ids.add(a.id)}save()}}catch{alert('올바른 백업 파일이 아니야.')}e.target.value=''};
+render();
+</script>
+</body></html>
